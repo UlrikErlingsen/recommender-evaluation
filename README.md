@@ -126,10 +126,11 @@ The test suite covers temporal leakage, item availability, candidate constructio
 
 ## Relationship to the Signal suite
 
-- **ExperimentSignal** tests the finalist’s incremental effect with randomized assignment.
-- **TextSignal** audits open-text evidence that may inform item or content features.
-- **SegmentSignal** explores customer structure; subgroup results here remain diagnostic rather than a fairness verdict.
-- **AllocSignal** plans media economics and must not treat offline recommendation accuracy as causal return.
+- **[ExperimentSignal](https://github.com/UlrikErlingsen/experiment-analysis)** tests the finalist’s incremental effect with randomized assignment.
+- **[TextSignal](https://github.com/UlrikErlingsen/open-text-analysis)** audits open-text evidence that may inform item or content features.
+- **[SegmentSignal](https://github.com/UlrikErlingsen/customer-segmentation)** explores customer structure; subgroup results here remain diagnostic rather than a fairness verdict.
+- **[AllocSignal](https://github.com/UlrikErlingsen/marketing-mix-allocation)** plans media economics and must not treat offline recommendation accuracy as causal return.
+- **[WorthSignal](https://github.com/UlrikErlingsen/customer-value-analytics)** values the customers a recommender serves; **[PriceSignal](https://github.com/UlrikErlingsen/pricing-analysis)** prices what it recommends; **[GateSignal](https://github.com/UlrikErlingsen/launch-decision-gate)** decides whether the recommender project itself deserves the next investment.
 
 RecommendSignal shares the suite’s local-first, named-method, fictional-demo, portable-evidence, and explicit-boundary standard. The portfolio overview is at [ulrikerlingsen.com](https://ulrikerlingsen.com).
 
