@@ -13,7 +13,7 @@ COPY app.py ./
 COPY assets ./assets
 COPY examples ./examples
 COPY docs ./docs
-RUN useradd --create-home --uid 10001 recommendsignal && chown -R recommendsignal:recommendsignal /app
+RUN useradd --create-home --uid 10001 recommendsignal
 USER recommendsignal
 
 EXPOSE 8587
