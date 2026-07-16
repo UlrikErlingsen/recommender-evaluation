@@ -1,0 +1,3 @@
+user_id,item_id,timestamp,event_weight,event_type,subgroup
+USER-001,ITEM-001,2026-01-05T09:00:00Z,1.0,open,Declared cohort A
+USER-001,ITEM-002,2026-01-12T09:00:00Z,2.0,save,Declared cohort A

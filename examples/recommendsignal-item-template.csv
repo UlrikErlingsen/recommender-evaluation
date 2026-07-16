@@ -1,0 +1,3 @@
+item_id,item_name,available_at,feature_topic_a,feature_topic_b
+ITEM-001,Example item one,2025-12-01T00:00:00Z,1.0,0.0
+ITEM-002,Example item two,2025-12-01T00:00:00Z,0.0,1.0

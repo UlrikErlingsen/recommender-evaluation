@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 460" role="img" aria-labelledby="title desc">
+  <title id="title">RecommendSignal banner</title>
+  <desc id="desc">Recommendation policy evidence with ranked paths and temporal checkpoints.</desc>
+  <rect width="1600" height="460" rx="36" fill="#10243e"/>
+  <circle cx="1370" cy="70" r="240" fill="#0f766e" opacity=".35"/>
+  <circle cx="1460" cy="390" r="180" fill="#f3b949" opacity=".2"/>
+  <text x="105" y="192" fill="#dff7f2" font-family="Arial, sans-serif" font-size="82" font-weight="700">RecommendSignal</text>
+  <text x="110" y="257" fill="#93d9cf" font-family="Arial, sans-serif" font-size="30">Temporal offline evidence for recommendation policies</text>
+  <path d="M1110 126h220M1110 207h295M1110 288h170M1110 369h255" stroke="#93d9cf" stroke-width="22" stroke-linecap="round" opacity=".9"/>
+  <circle cx="1430" cy="207" r="38" fill="#f3b949"/>
+</svg>

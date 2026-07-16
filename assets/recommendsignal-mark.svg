@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">RecommendSignal working mark</title>
+  <desc id="desc">Four ranked arcs converging on a highlighted recommendation point.</desc>
+  <rect width="512" height="512" rx="108" fill="#10243e"/>
+  <path d="M104 142h188" fill="none" stroke="#dff7f2" stroke-width="28" stroke-linecap="round"/>
+  <path d="M104 216h242" fill="none" stroke="#93d9cf" stroke-width="28" stroke-linecap="round"/>
+  <path d="M104 290h164" fill="none" stroke="#4eb7aa" stroke-width="28" stroke-linecap="round"/>
+  <path d="M104 364h218" fill="none" stroke="#0f766e" stroke-width="28" stroke-linecap="round"/>
+  <circle cx="382" cy="216" r="44" fill="#f3b949"/>
+  <circle cx="382" cy="216" r="17" fill="#10243e"/>
+</svg>
