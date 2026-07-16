@@ -10,6 +10,9 @@ RecommendSignal uses established ideas from public recommender-systems, informat
 4. Ji, Y., Sun, A., Zhang, J., & Li, C. (2023). A critical study on data leakage in recommender system offline evaluation. *ACM Transactions on Information Systems, 41*(3), 1–27. https://doi.org/10.1145/3569930
 5. Tian, M., & Ekstrand, M. D. (2020). Estimating error and bias in offline evaluation results. *Proceedings of CHIIR ’20*, 392–396. https://doi.org/10.1145/3343413.3378004
 6. Beel, J., & Langer, S. (2015). A comparison of offline evaluations, online evaluations, and user studies in the context of research-paper recommender systems. In *Research and Advanced Technology for Digital Libraries (TPDL 2015), Lecture Notes in Computer Science, 9316* (pp. 153–168). Springer. https://doi.org/10.1007/978-3-319-24592-8_12
+7. Sarwar, B., Karypis, G., Konstan, J., & Riedl, J. (2001). Item-based collaborative filtering recommendation algorithms. *WWW '01*, 285–295. https://doi.org/10.1145/371920.372071
+8. Cremonesi, P., Koren, Y., & Turrin, R. (2010). Performance of recommender algorithms on top-n recommendation tasks. *RecSys '10*, 39–46. https://doi.org/10.1145/1864708.1864721
+9. Benjamini, Y., & Hochberg, Y. (1995). Controlling the false discovery rate: A practical and powerful approach to multiple testing. *Journal of the Royal Statistical Society B, 57*(1), 289–300. https://doi.org/10.1111/j.2517-6161.1995.tb02031.x
 
 These references motivate the evaluation categories and boundaries. They do not supply this app’s prose, layout, datasets, or code.
 
