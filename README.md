@@ -130,7 +130,9 @@ The test suite covers temporal leakage, item availability, candidate constructio
 - **[TextSignal](https://github.com/UlrikErlingsen/open-text-analysis)** audits open-text evidence that may inform item or content features.
 - **[SegmentSignal](https://github.com/UlrikErlingsen/customer-segmentation)** explores customer structure; subgroup results here remain diagnostic rather than a fairness verdict.
 - **[AllocSignal](https://github.com/UlrikErlingsen/marketing-mix-allocation)** plans media economics and must not treat offline recommendation accuracy as causal return.
-- **[WorthSignal](https://github.com/UlrikErlingsen/customer-value-analytics)** values the customers a recommender serves; **[PriceSignal](https://github.com/UlrikErlingsen/pricing-analysis)** prices what it recommends; **[GateSignal](https://github.com/UlrikErlingsen/launch-decision-gate)** decides whether the recommender project itself deserves the next investment.
+- **[WorthSignal](https://github.com/UlrikErlingsen/customer-value-analytics)** values the customers a recommender serves; **[TagSignal](https://github.com/UlrikErlingsen/pricing-analysis)** prices what it recommends; **[GateSignal](https://github.com/UlrikErlingsen/launch-decision-gate)** decides whether the recommender project itself deserves the next investment.
+- **[TraceSignal](https://github.com/UlrikErlingsen/journey-path-analysis)** describes how logged customer journeys unfold — transitions, path support, drop-off, and Markov removal sensitivity — with no causal channel credit and no recommendation-policy verdict.
+- **[TrackSignal](https://github.com/UlrikErlingsen/brand-tracking)** compares brand measures across tracking waves with intervals, multiple-comparison control, and declared practical thresholds.
 
 RecommendSignal shares the suite’s local-first, named-method, fictional-demo, portable-evidence, and explicit-boundary standard. The portfolio overview is at [ulrikerlingsen.com](https://ulrikerlingsen.com).
 
