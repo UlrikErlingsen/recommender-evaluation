@@ -10,9 +10,11 @@ def _product_text() -> str:
 
 
 def test_exact_product_and_package_name_are_consistent() -> None:
+    from recommendsignal import __version__
+
     pyproject = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
     assert 'name = "recommendsignal"' in pyproject
-    assert 'version = "1.0.0"' in pyproject
+    assert f'version = "{__version__}"' in pyproject
     assert "RecommendSignal" in (ROOT / "README.md").read_text(encoding="utf-8")
 
 
