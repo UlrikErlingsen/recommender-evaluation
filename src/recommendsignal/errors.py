@@ -1,4 +1,4 @@
-"""User-facing errors raised by RecommendSignal."""
+"""User-facing errors raised by Recommend Signal."""
 
 
 class DataProblem(ValueError):

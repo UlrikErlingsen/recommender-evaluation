@@ -6,7 +6,7 @@ Confirm that each fold respects the global timeline, that item availability is c
 
 ## Read ranking and distribution together
 
-A higher Recall@K or NDCG@K can coincide with narrower coverage and heavier exposure concentration. That may be acceptable, harmful, or strategically irrelevant depending on the product objective, supplier ecosystem, inventory, and user experience. RecommendSignal keeps these quantities separate so the decision owner must state the trade-off.
+A higher Recall@K or NDCG@K can coincide with narrower coverage and heavier exposure concentration. That may be acceptable, harmful, or strategically irrelevant depending on the product objective, supplier ecosystem, inventory, and user experience. Recommend Signal keeps these quantities separate so the decision owner must state the trade-off.
 
 ## Inspect temporal stability
 
@@ -20,7 +20,7 @@ Content-based policies can score interaction-cold items when valid features exis
 
 Check sample size, history length, catalog eligibility, exposure, and relevance measurement inside each group. A gap can arise from data coverage or policy design and does not identify its cause. Fairness assessment requires domain-specific harms, rights, and stakeholder judgment beyond this dashboard.
 
-## Handoff to ExperimentSignal
+## Handoff to Experiment Signal
 
 Use the offline evaluation to narrow candidates and document guardrails. Then preregister an online randomized test that defines:
 

@@ -1,4 +1,4 @@
-"""RecommendSignal: temporal offline evaluation for recommendation policies."""
+"""Recommend Signal: temporal offline evaluation for recommendation policies."""
 
 from .analysis import EvaluationResult, evaluate_policies
 from .design import EvaluationConfig, ValidatedData, validate_inputs

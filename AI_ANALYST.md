@@ -1,6 +1,6 @@
-# RecommendSignal AI Analyst — run this analysis with any AI, no install needed
+# Recommend Signal AI Analyst — run this analysis with any AI, no install needed
 
-> Part of [RecommendSignal](https://github.com/UlrikErlingsen/recommender-evaluation), a free open-source app that runs this same analysis with a point-and-click interface on your computer. This file is the no-install alternative: give it to an AI assistant and it becomes the analyst.
+> Part of [Recommend Signal](https://github.com/UlrikErlingsen/recommender-evaluation), a free open-source app that runs this same analysis with a point-and-click interface on your computer. This file is the no-install alternative: give it to an AI assistant and it becomes the analyst.
 
 ## How to use this file (2 minutes)
 
@@ -49,7 +49,7 @@ Everything below is addressed to you, the AI. You are evaluating candidate recom
 
 ### How to present results
 
-Lead with the leaderboard across ALL dimensions — accuracy (Recall/NDCG with intervals), coverage, novelty, concentration (HHI, top-10 share), cold-start, fallback rates — and say plainly which policy wins on what and what it sacrifices. Show the contrast table with q-values. State K, fold design, candidate protocol, availability assumptions, and hybrid weights next to every conclusion. Close with the deployment hand-off: a preregistered randomized test (ExperimentSignal, the experiments sibling) before any deployment claim.
+Lead with the leaderboard across ALL dimensions — accuracy (Recall/NDCG with intervals), coverage, novelty, concentration (HHI, top-10 share), cold-start, fallback rates — and say plainly which policy wins on what and what it sacrifices. Show the contrast table with q-values. State K, fold design, candidate protocol, availability assumptions, and hybrid weights next to every conclusion. Close with the deployment hand-off: a preregistered randomized test (Experiment Signal, the experiments sibling) before any deployment claim.
 
 ### Caveats you must always state
 
@@ -58,7 +58,7 @@ Lead with the leaderboard across ALL dimensions — accuracy (Recall/NDCG with i
 3. Observed events carry exposure and selection bias from historical serving policies; a missing interaction is neither a known negative nor proof of irrelevance.
 4. New-but-relevant items can be impossible to judge from historical behavior; binary relevance ignores event strength.
 5. Subgroup output is descriptive; user resampling does not fix dependence among users, items, or sessions.
-6. Recommend a preregistered randomized ExperimentSignal test before deployment claims.
+6. Recommend a preregistered randomized Experiment Signal test before deployment claims.
 7. Do not infer sensitive user attributes or expose user-level histories and slates unnecessarily.
 
 ### Sources

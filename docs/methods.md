@@ -2,7 +2,7 @@
 
 ## Evaluation target
 
-RecommendSignal evaluates whether a policy can rank items that appear in later observed implicit-feedback events. This is a historical replay target. It is not complete preference measurement, counterfactual policy value, or a treatment effect.
+Recommend Signal evaluates whether a policy can rank items that appear in later observed implicit-feedback events. This is a historical replay target. It is not complete preference measurement, counterfactual policy value, or a treatment effect.
 
 ## Global temporal folds
 

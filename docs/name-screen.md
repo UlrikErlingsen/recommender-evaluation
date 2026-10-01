@@ -1,6 +1,8 @@
-# Working-name screen: RecommendSignal
+# Working-name screen: Recommend Signal
 
 Screen date: 16 July 2026.
+
+> **Display name since 1.1.0:** the product is written **Recommend Signal** (with a space) in the Signal brand refresh; the package, file and environment-variable names stay `recommendsignal` / `RECOMMENDSIGNAL_*`. The screen below was run on the exact combined string “RecommendSignal” (one search also used the spaced phrase “Recommend Signal”) and has not been repeated for the new spelling. The refresh changes spelling only and claims no new clearance.
 
 ## Result
 
@@ -21,7 +23,7 @@ This was a practical product-name screen, not legal advice or a trademark opinio
 
 ## Recommendation
 
-Retain **RecommendSignal** as the requested working title. Before public or commercial launch, check exact and similar spellings in the relevant official trademark and company registers, confirm domain and social-handle strategy, repeat GitHub/PyPI/npm/app-store searches, and obtain qualified legal advice if the name will carry material value.
+Retain **Recommend Signal** (screened as “RecommendSignal”) as the requested working title. Before public or commercial launch, check exact and similar spellings in the relevant official trademark and company registers, confirm domain and social-handle strategy, repeat GitHub/PyPI/npm/app-store searches, and obtain qualified legal advice if the name will carry material value.
 
 ## Screen references
 

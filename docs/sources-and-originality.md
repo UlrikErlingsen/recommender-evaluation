@@ -2,7 +2,7 @@
 
 ## Public foundations
 
-RecommendSignal uses established ideas from public recommender-systems, information-retrieval, and statistical literature. Key references include:
+Recommend Signal uses established ideas from public recommender-systems, information-retrieval, and statistical literature. Key references include:
 
 1. Herlocker, J. L., Konstan, J. A., Terveen, L. G., & Riedl, J. T. (2004). Evaluating collaborative filtering recommender systems. *ACM Transactions on Information Systems, 22*(1), 5–53. https://doi.org/10.1145/963770.963772
 2. Järvelin, K., & Kekäläinen, J. (2002). Cumulated gain-based evaluation of IR techniques. *ACM Transactions on Information Systems, 20*(4), 422–446. https://doi.org/10.1145/582415.582418
@@ -18,7 +18,7 @@ These references motivate the evaluation categories and boundaries. They do not 
 
 ## Original work
 
-The following were created independently for RecommendSignal:
+The following were created independently for Recommend Signal:
 
 - its global-fold data contract and audit wording;
 - the exact transparent baseline implementations;
@@ -33,4 +33,4 @@ No lecture slide deck, teaching narrative, note, case, exercise, assessment, dia
 
 ## Responsible citation
 
-Users should cite the original methodological literature for the concepts they rely on and cite RecommendSignal only for this implementation. Do not present the app as affiliated with or endorsed by any institution, or as a substitute for the original research.
+Users should cite the original methodological literature for the concepts they rely on and cite Recommend Signal only for this implementation. Do not present the app as affiliated with or endorsed by any institution, or as a substitute for the original research.

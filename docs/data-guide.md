@@ -24,7 +24,7 @@ Exact user-item-timestamp duplicates are rejected because they commonly indicate
 | `available_at` | recommended | Earliest time the item could be recommended. |
 | `feature_*` | at least one | Finite numeric content feature known at prediction time. |
 
-If `available_at` is omitted, RecommendSignal assumes the full catalog predates the log and displays a warning. This assumption can hide availability leakage.
+If `available_at` is omitted, Recommend Signal assumes the full catalog predates the log and displays a warning. This assumption can hide availability leakage.
 
 Feature columns may be one-hot topics, continuous embeddings reduced to interpretable components, or other numeric descriptors. They must be created without using information from after the evaluated cutoff. Do not include later performance, later reviews, or later interaction aggregates as content features for an earlier fold.
 

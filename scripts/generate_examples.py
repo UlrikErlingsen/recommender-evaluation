@@ -1,4 +1,4 @@
-"""Regenerate RecommendSignal's deterministic fictional examples."""
+"""Regenerate Recommend Signal's deterministic fictional examples."""
 
 from __future__ import annotations
 

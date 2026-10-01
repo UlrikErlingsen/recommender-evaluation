@@ -16,7 +16,9 @@ def test_exact_product_and_package_name_are_consistent() -> None:
     pyproject = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
     assert 'name = "recommendsignal"' in pyproject
     assert f'version = "{__version__}"' in pyproject
-    assert "RecommendSignal" in (ROOT / "README.md").read_text(encoding="utf-8")
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    assert "**Recommend Signal**" in readme
+    assert 'description = "Recommend Signal:' in pyproject
 
 
 def test_name_is_not_presented_as_legally_cleared() -> None:
@@ -64,15 +66,35 @@ def test_app_uses_shared_signal_theme_instead_of_pasted_styles() -> None:
     assert "gatherUsageStats = false" in config
 
 
-def test_readme_contract_is_present() -> None:
+def test_readme_follows_the_signal_template() -> None:
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
-    assert "recommendsignal-banner.svg" in readme
-    for heading in (
+    assert '<img src="assets/recommendsignal-banner.png"' in readme
+    assert "Signal-Customer-aa5d83" in readme
+    assert "assets/recommendsignal-mark-64.png" in readme
+    assert "recommendsignal-banner.svg" not in readme
+    headings = [
         "## Read this first",
-        "## Try it in three minutes",
-        "## Evidence pack",
+        "## Scope",
+        "## Try the demo in three minutes",
+        "## Data contract",
+        "## Analysis contract",
+        "## Methods",
+        "## Decision statuses",
+        "## Exports",
+        "## Run locally",
         "## Privacy",
-        "## Development checks",
-        "## Relationship to the Signal suite",
-    ):
-        assert heading in readme
+        "## No install? Give this file to an AI",
+        "## Development",
+        "## Where this fits in Signal",
+        "## References",
+        "## Originality and license",
+    ]
+    positions = [readme.index(heading + "\n") for heading in headings]
+    assert positions == sorted(positions)
+
+
+def test_brand_assets_are_the_synced_signal_files() -> None:
+    assets = ROOT / "assets"
+    for name in ("banner.png", "social.png", "mark.svg", "mark-32.png", "mark-64.png", "mark-512.png"):
+        assert (assets / f"recommendsignal-{name}").exists(), name
+    assert not (assets / "recommendsignal-banner.svg").exists()

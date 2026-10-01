@@ -1,4 +1,4 @@
-"""Deterministic, wholly fictional RecommendSignal example data."""
+"""Deterministic, wholly fictional Recommend Signal example data."""
 
 from __future__ import annotations
 

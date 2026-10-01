@@ -10,4 +10,4 @@ Do not open a public issue containing personal interaction data, credentials, ex
 
 ## Scope
 
-RecommendSignal does not authenticate users or encrypt stored files. Those responsibilities belong to the deployment environment. Treat uploaded logs and exported slates as sensitive data.
+Recommend Signal does not authenticate users or encrypt stored files. Those responsibilities belong to the deployment environment. Treat uploaded logs and exported slates as sensitive data.

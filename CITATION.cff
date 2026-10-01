@@ -1,6 +1,6 @@
 cff-version: 1.2.0
-message: "If you use this software, cite it using this metadata. RecommendSignal remains an uncleared working title."
-title: "RecommendSignal: temporal offline recommendation-policy evaluation"
+message: "If you use this software, cite it using this metadata. Recommend Signal remains an uncleared working title."
+title: "Recommend Signal: temporal offline recommendation-policy evaluation"
 type: software
 authors:
   - family-names: Erlingsen
