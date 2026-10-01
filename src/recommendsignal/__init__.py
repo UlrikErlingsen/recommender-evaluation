@@ -13,4 +13,4 @@ __all__ = [
     "validate_inputs",
 ]
 
-__version__ = "1.0.1"
+__version__ = "1.1.0"
