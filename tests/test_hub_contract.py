@@ -138,3 +138,50 @@ def test_session_state_and_widget_keys_go_through_the_namespace_helper() -> None
     assert all(key.startswith("k(") for key in state_keys), state_keys
     assert all(key.startswith("k(") for key in widget_keys), widget_keys
     assert 'NS = "recommend"' in source
+
+
+def test_render_works_from_the_packaged_files_only(tmp_path: Path) -> None:
+    # Signal Hub installs the release as a normal package: only the .py files under src/recommendsignal and the
+    # declared package data (ui/assets/marks/*) exist. Copy exactly that, run from an unrelated working directory,
+    # and render every page, so no page can depend on examples/, docs/, assets/ or other repo-root files.
+    site = tmp_path / "site"
+    for path in PACKAGE.rglob("*.py"):
+        target = site / "recommendsignal" / path.relative_to(PACKAGE)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(path.read_bytes())
+    for path in (UI / "assets" / "marks").iterdir():
+        target = site / "recommendsignal" / "ui" / "assets" / "marks" / path.name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(path.read_bytes())
+    code = (
+        f"import sys\nsys.path.insert(0, {str(site)!r})\n"
+        "from pathlib import Path\n"
+        "import recommendsignal\n"
+        f"assert Path(recommendsignal.__file__).is_relative_to({str(site)!r}), recommendsignal.__file__\n"
+        "from streamlit.testing.v1 import AppTest\n"
+        f"pages = {PAGES!r}\n"
+        f"app = AppTest.from_string({RENDER_SCRIPT!r}, default_timeout=180)\n"
+        "app.run()\n"
+        "for page in pages:\n"
+        "    app.sidebar.radio[0].set_value(page).run()\n"
+        "    assert not app.exception, (page, [e.value for e in app.exception])\n"
+        "    assert not app.error, (page, [e.value for e in app.error])\n"
+        "print('ok')\n"
+    )
+    result = subprocess.run(
+        [sys.executable, "-c", code],
+        capture_output=True,
+        text=True,
+        timeout=600,
+        cwd=tmp_path,
+    )
+    assert result.returncode == 0, result.stderr[-4000:]
+    assert "ok" in result.stdout
+
+
+def test_ui_reads_no_repo_root_files() -> None:
+    # Data comes from generators in code; the only file the UI reads is the packaged mark (via signal_theme).
+    for name in ("app.py", "__init__.py"):
+        source = (UI / name).read_text(encoding="utf-8")
+        for pattern in ("__file__", "Path(", "open(", "examples/", "assets/", "docs/"):
+            assert pattern not in source, (name, pattern)
