@@ -241,7 +241,7 @@ def evaluate_policies(data: ValidatedData, config: EvaluationConfig | None = Non
     warnings.extend(
         [
             "Recall and NDCG replay observed interactions, not complete relevance judgments; exposure and selection bias remain.",
-            "Offline policy differences do not establish commercial lift, user welfare, or causality. Test a final policy in ExperimentSignal.",
+            "Offline policy differences do not establish commercial lift, user welfare, or causality. Test a final policy in Experiment Signal.",
             "Subgroup gaps are descriptive diagnostics, not automatic findings of fairness, discrimination, or harm.",
             "Confidence intervals resample users and remain approximate when users or items are dependent.",
             f"Hybrid weights for this run: {asdict(config)['hybrid_popularity_weight']:.2f} popularity, "

@@ -2,10 +2,11 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).parents[1]
+UI = ROOT / "src" / "recommendsignal" / "ui"
 
 
 def _product_text() -> str:
-    paths = [ROOT / "app.py", ROOT / "README.md", *sorted((ROOT / "docs").glob("*.md"))]
+    paths = [ROOT / "app.py", UI / "app.py", ROOT / "README.md", *sorted((ROOT / "docs").glob("*.md"))]
     return "\n".join(path.read_text(encoding="utf-8") for path in paths)
 
 
@@ -27,7 +28,7 @@ def test_name_is_not_presented_as_legally_cleared() -> None:
 def test_offline_results_never_become_causal_lift() -> None:
     text = _product_text()
     assert "Offline ranking accuracy does not demonstrate" in text
-    assert "ExperimentSignal" in text
+    assert "Experiment Signal" in text
     assert "No causal" in text or "no causal" in text
 
 
@@ -43,12 +44,28 @@ def test_originality_boundary_is_explicit() -> None:
     assert "fictional" in text
 
 
-def test_suite_shell_and_readme_contract_are_present() -> None:
-    app = (ROOT / "app.py").read_text(encoding="utf-8")
-    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+def test_app_uses_shared_signal_theme_instead_of_pasted_styles() -> None:
+    standalone = (ROOT / "app.py").read_text(encoding="utf-8")
+    ui_source = (UI / "app.py").read_text(encoding="utf-8")
     config = (ROOT / ".streamlit" / "config.toml").read_text(encoding="utf-8")
-    assert "apply_suite_theme" in app
-    assert "masthead(" in app and "footer(" in app and "sidebar_brand(" in app
+    assert 'st.set_page_config(**sig.page_config("recommend"))' in standalone
+    assert "sig.apply(NS)" in ui_source
+    for call in ("sig.sidebar_brand(", "sig.masthead(", "sig.footer(", "sig.hero(", "sig.note("):
+        assert call in ui_source
+    # Every Plotly figure uses the per-app template and is shown through sig.chart (template + theme=None).
+    assert ui_source.count("template=sig.template(NS)") == 3
+    assert ui_source.count("sig.chart(NS, ") == 3
+    assert "st.plotly_chart(" not in ui_source
+    assert "<style>" not in standalone + ui_source
+    assert not (ROOT / "src" / "recommendsignal" / "suite_brand.py").exists()
+    for old_colour in ("#173c3a", "#d95b40", "#83d2b4", "#f2c66d", "#0f766e", "#5b6f91", "#d97706", "#7c3aed"):
+        assert old_colour not in (standalone + ui_source).lower()
+    assert 'primaryColor = "#aa5d83"' in config  # Customer family 600
+    assert "gatherUsageStats = false" in config
+
+
+def test_readme_contract_is_present() -> None:
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
     assert "recommendsignal-banner.svg" in readme
     for heading in (
         "## Read this first",
@@ -59,4 +76,3 @@ def test_suite_shell_and_readme_contract_are_present() -> None:
         "## Relationship to the Signal suite",
     ):
         assert heading in readme
-    assert "gatherUsageStats = false" in config

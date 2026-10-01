@@ -1,2 +1,2 @@
--e .
+-e .[ui]
 defusedxml>=0.7,<1

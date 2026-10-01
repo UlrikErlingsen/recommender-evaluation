@@ -40,5 +40,5 @@ def test_subgroup_tables_remain_policy_specific(result) -> None:
 def test_warnings_preserve_offline_causal_boundary(result) -> None:
     warnings = " ".join(result.warnings)
     assert "do not establish commercial lift" in warnings
-    assert "ExperimentSignal" in warnings
+    assert "Experiment Signal" in warnings
     assert "descriptive diagnostics" in warnings
