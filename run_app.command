@@ -67,7 +67,7 @@ PY
 fi
 
 URL="http://127.0.0.1:${PORT}"
-MAX_UPLOAD_MB="${RECOMMENDSIGNAL_MAX_UPLOAD_MB:-200}"
+MAX_UPLOAD_MB="${RECOMMENDSIGNAL_MAX_UPLOAD_MB:-10000}"
 echo "Starting Recommend Signal at ${URL}..."
 python -m streamlit run app.py \
   --server.headless=true \

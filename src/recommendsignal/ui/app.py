@@ -24,6 +24,7 @@ from recommendsignal.examples import (
     make_demo_events,
     make_event_template,
 )
+from recommendsignal.errors import out_of_memory_message
 from recommendsignal.io import build_evidence_workbook, dataframe_csv_bytes, read_table
 from recommendsignal.ui import signal_theme as sig
 
@@ -55,6 +56,9 @@ PAGES = [
     "Methods & boundaries",
 ]
 
+# Above this many slate rows the evidence files are built only when their download button is clicked.
+LAZY_EXPORT_ROWS = 250_000
+
 DEMO_SOURCE = "Fictional demonstration"
 UPLOAD_SOURCE = "Upload my files"
 DEMO_LABEL = "Deterministic fictional demonstration"
@@ -83,27 +87,69 @@ def _demo() -> tuple[pd.DataFrame, pd.DataFrame]:
     return make_demo_events(), make_demo_catalog()
 
 
-@st.cache_data(show_spinner="Running temporal policy evaluation…")
+def _session_memo(name: str, key: object, compute):
+    """Keep one result per name in this session while ``key`` is unchanged.
+
+    Results stay in the session rather than ``st.cache_data``: hashing and copying logs and slate tables with
+    millions of rows on every rerun would cost more than the evaluation it protects.
+    """
+    cached = st.session_state.get(k(name))
+    if cached is not None and cached[0] == key:
+        return cached[1]
+    value = compute()
+    st.session_state[k(name)] = (key, value)
+    return value
+
+
+def _validated(events: pd.DataFrame, items: pd.DataFrame):
+    token = st.session_state.get(k("data_token"))
+
+    def compute():
+        data = validate_inputs(events, items)
+        return data, audit_data(data)
+
+    if st.session_state.get(k("validation"), (None,))[0] == token:
+        return _session_memo("validation", token, compute)
+    with st.spinner(f"Checking {len(events):,} interactions and {len(items):,} catalog items…"):
+        return _session_memo("validation", token, compute)
+
+
 def _evaluate(events: pd.DataFrame, items: pd.DataFrame, config: EvaluationConfig):
-    data = validate_inputs(events, items)
-    return data, audit_data(data), evaluate_policies(data, config)
+    token = st.session_state.get(k("data_token"))
+    data, audit = _validated(events, items)
+    if st.session_state.get(k("evaluation"), (None,))[0] != (token, config):
+        with st.spinner(
+            f"Running temporal policy evaluation over {len(data.events):,} interactions and the full "
+            f"{len(data.items):,}-item catalog…"
+        ):
+            _session_memo("evaluation", (token, config), lambda: evaluate_policies(data, config))
+    return data, audit, _session_memo("evaluation", (token, config), lambda: None)
 
 
-def _store(events: pd.DataFrame, items: pd.DataFrame, source_label: str) -> None:
-    st.session_state[k("events")] = events
-    st.session_state[k("items")] = items
+def _store(load, source_label: str, token: object) -> None:
+    """Make data active. ``load`` returns (events, items) and runs only when ``token`` names different data."""
+    if st.session_state.get(k("data_token")) != token:
+        events, items = load()
+        st.session_state[k("events")] = events
+        st.session_state[k("items")] = items
+        st.session_state[k("data_token")] = token
+        for name in ("validation", "evaluation", "evidence"):
+            st.session_state.pop(k(name), None)
     st.session_state[k("source_label")] = source_label
 
 
 def _ensure_state() -> None:
     if k("events") not in st.session_state:
-        _store(*_demo(), DEMO_LABEL)
+        _store(_demo, DEMO_LABEL, "demo")
 
 
 def show_error(exc: Exception) -> None:
     """Render a useful error while keeping tracebacks opt-in."""
     if isinstance(exc, DataProblem):
         st.error(str(exc))
+        return
+    if isinstance(exc, MemoryError):
+        st.error(out_of_memory_message())
         return
     st.error(
         "Recommend Signal hit an unexpected problem while drawing this page. Check the inputs and settings, then "
@@ -117,15 +163,24 @@ def show_error(exc: Exception) -> None:
 def _load_data(choices: SidebarChoices) -> None:
     """Put the selected interaction log and item catalog into session state (the demo until both uploads exist)."""
     if choices.source == DEMO_SOURCE:
-        _store(*_demo(), DEMO_LABEL)
+        _store(_demo, DEMO_LABEL, "demo")
         return
     if choices.event_upload is None or choices.item_upload is None:
         st.info("Upload both the interaction log and the item catalog. Until then, the fictional demonstration remains active.")
-        _store(*_demo(), "Fictional demonstration while uploads are incomplete")
+        _store(_demo, "Fictional demonstration while uploads are incomplete", "demo")
         return
-    events = read_table(choices.event_upload.name, choices.event_upload.getvalue(), sheet_name="interactions")
-    items = read_table(choices.item_upload.name, choices.item_upload.getvalue(), sheet_name="items")
-    _store(events, items, "User-supplied local data")
+
+    def identity(upload) -> tuple:
+        return (str(getattr(upload, "file_id", "") or upload.name), upload.name, int(getattr(upload, "size", 0)))
+
+    def load() -> tuple[pd.DataFrame, pd.DataFrame]:
+        with st.spinner(f"Reading {choices.event_upload.name} and {choices.item_upload.name}…"):
+            events = read_table(choices.event_upload.name, choices.event_upload.getvalue(), sheet_name="interactions")
+            items = read_table(choices.item_upload.name, choices.item_upload.getvalue(), sheet_name="items")
+        return events, items
+
+    # Read each pair of uploads once: rereading a large log on every rerun would make every click slow.
+    _store(load, "User-supplied local data", ("upload", identity(choices.event_upload), identity(choices.item_upload)))
 
 
 def _settings() -> dict[str, Any]:
@@ -248,8 +303,7 @@ def page_welcome() -> None:
 def page_data(events: pd.DataFrame, items: pd.DataFrame, source_label: str, config: EvaluationConfig) -> None:
     sig.header("Step 1", "Data & temporal contract")
     st.caption(source_label)
-    data = validate_inputs(events, items)
-    audit = audit_data(data)
+    data, audit = _validated(events, items)
     folds = make_temporal_folds(data.events, config)
     col1, col2, col3, col4 = st.columns(4)
     values = dict(zip(audit.overview["measure"], audit.overview["value"], strict=True))
@@ -445,7 +499,24 @@ def page_evidence(data, audit, result, source_label: str) -> None:
         "decision_boundary": "No causal, commercial, satisfaction, retention, or welfare claim",
         "next_step": "Preregister and randomize the final policy in Experiment Signal",
     }
-    workbook = build_evidence_workbook(metadata=metadata, audit=audit, result=result)
+    def build_workbook() -> bytes:
+        return build_evidence_workbook(metadata=metadata, audit=audit, result=result)
+
+    large = len(result.recommendations) > LAZY_EXPORT_ROWS
+    if large:
+        # Large evaluations: Streamlit builds each file only when its button is clicked, so reruns stay fast.
+        st.caption(
+            f"This evaluation produced {len(result.recommendations):,} slate rows, so each file below is prepared when "
+            "you click it. Tables longer than a workbook sheet are in their CSV downloads, which hold every row."
+        )
+        workbook = build_workbook
+    else:
+        token = (st.session_state.get(k("data_token")), result.config, source_label)
+        workbook = _session_memo("evidence", token, build_workbook)
+
+    def csv_download(frame: pd.DataFrame):
+        return (lambda: dataframe_csv_bytes(frame)) if large else dataframe_csv_bytes(frame)
+
     st.download_button(
         "Download Recommend Signal evidence pack",
         workbook,
@@ -468,6 +539,21 @@ def page_evidence(data, audit, result, source_label: str) -> None:
         "recommendsignal-paired-contrasts.csv",
         "text/csv",
         key=k("download_paired_contrasts"),
+    )
+    c3, c4 = st.columns(2)
+    c3.download_button(
+        "Download user metrics CSV",
+        csv_download(result.user_metrics),
+        "recommendsignal-user-metrics.csv",
+        "text/csv",
+        key=k("download_user_metrics"),
+    )
+    c4.download_button(
+        "Download recommendation slates CSV",
+        csv_download(result.recommendations),
+        "recommendsignal-recommendations.csv",
+        "text/csv",
+        key=k("download_recommendations"),
     )
     st.markdown("### Export metadata")
     st.json(metadata)

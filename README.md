@@ -58,7 +58,7 @@ The demonstration contains no real customers, items, preferences, or commercial 
 
 ## Data contract
 
-Upload two tables, as CSV or XLSX: an interaction log and an item catalog. Workbooks may use `interactions` and `items` sheet names; when absent, the first sheet is read. Uploads are capped at 50 MB (workbooks additionally at 200 MB expanded, 500,000 rows, and 200 columns).
+Upload two tables, as CSV or XLSX: an interaction log and an item catalog. Workbooks may use `interactions` and `items` sheet names; when absent, the first sheet is read.
 
 Interactions require:
 
@@ -79,6 +79,14 @@ The item catalog requires unique `item_id`, `item_name`, at least one finite num
 | ITEM-001 | Fictional selection 001 | 2025-01-01T00:00:00+00:00 | 1.0 | 0.0 | … |
 
 The contract rejects exact user-item-timestamp duplicates, nonpositive event weights, users whose subgroup label changes, interactions before an item’s declared availability, and catalogs without numeric content features. The fictional data and starter templates are in [`examples/`](examples/). See the complete [data guide](docs/data-guide.md) for validation rules.
+
+### Data limits
+
+**Run locally there is no built-in limit** on file size, rows, columns, users or catalog items: your computer's memory is the limit. Streamlit's upload cap defaults to 10,000 MB (`RECOMMENDSIGNAL_MAX_UPLOAD_MB` in the launchers, `STREAMLIT_SERVER_MAX_UPLOAD_SIZE` in Docker). If a file or step needs more memory than the computer has, the app says so plainly instead of crashing. Every user is scored against the full eligible catalog; users are scored in batches with matrix operations (in parallel threads), and the results equal scoring one user at a time. The collaborative policy keeps a dense item-item similarity matrix, so its memory grows with the square of the catalog size (about 0.8 GB at 10,000 items). Recommendation slates and user metrics can run to millions of rows: the CSV downloads hold every row, a workbook sheet too large for Excel points to its CSV, and large evidence files are built when their button is clicked.
+
+On a 24-thread desktop with 32 GB of memory, 5 million interactions (400,000 users, a 2,000-item catalog, 205 MB CSV) loaded in about 7 seconds, passed the data contract in about 25 seconds and were evaluated over three folds (617,000 user-fold evaluations, 24.7 million slate rows) in about 3 minutes, with a peak of about 4.2 GB of memory.
+
+**The public online demo** (`SIGNAL_PUBLIC=1`) keeps hard caps to protect a shared server: 50 MB per upload, 200 MB of expanded Excel content, 500,000 rows and 200 columns per table, 2,500 catalog items and 1,000 bootstrap repetitions. Its messages say they are demo limits; the downloaded app has none. All caps live in `src/recommendsignal/limits.py`.
 
 ## Analysis contract
 
@@ -104,7 +112,7 @@ Four transparent baselines:
 - **Collaborative:** item-item cosine similarity from the implicit user-item matrix.
 - **Hybrid:** a declared weighted combination of within-user score ranks. Record the mix before inspecting holdout results; repeatedly changing it turns the holdout into tuning data.
 
-These are legible baselines for policy screening, not production serving systems. The collaborative implementation intentionally caps catalogs at 2,500 items because it materializes an item-similarity matrix for transparency.
+These are legible baselines for policy screening, not production serving systems. The collaborative implementation materializes a dense item-similarity matrix for transparency, so very large catalogs need memory in proportion to the square of the catalog size.
 
 Recall and NDCG are averaged within user across folds, then across users, with percentile-bootstrap intervals over user-level means. Policy contrasts pair candidate and reference metrics on the same users and report a paired user-level t interval with Benjamini–Hochberg q-values.
 
@@ -132,7 +140,7 @@ The XLSX evidence pack records:
 - policy summaries, paired user-level contrasts, fold stability, and subgroup and cold-start tables;
 - user-level metrics, recommendation slates, fold diagnostics, and limitations.
 
-CSV downloads provide the primary policy summary and paired contrasts. The pack deliberately contains no universal score or declaration of commercial lift. Exported text is neutralised against spreadsheet-formula interpretation.
+CSV downloads provide the policy summary, paired contrasts, user-level metrics and recommendation slates, each with every row. The pack deliberately contains no universal score or declaration of commercial lift. Exported text is neutralised against spreadsheet-formula interpretation.
 
 ## Run locally
 
@@ -149,7 +157,7 @@ python -m pip install -r requirements.txt
 python -m streamlit run app.py
 ```
 
-Recommend Signal prefers local port `8587` and falls back to another free port on macOS. Set `RECOMMENDSIGNAL_PORT` to choose a port, `RECOMMENDSIGNAL_MAX_UPLOAD_MB` to change Streamlit’s upload limit (the reader still caps files at 50 MB), `RECOMMENDSIGNAL_NO_BROWSER=1` to suppress browser opening on macOS, or `RECOMMENDSIGNAL_DEBUG=1` to reveal unexpected technical error details.
+Recommend Signal prefers local port `8587` and falls back to another free port on macOS. Set `RECOMMENDSIGNAL_PORT` to choose a port, `RECOMMENDSIGNAL_MAX_UPLOAD_MB` to change Streamlit’s upload cap (default 10000 MB; the app itself sets no file-size limit), `RECOMMENDSIGNAL_NO_BROWSER=1` to suppress browser opening on macOS, or `RECOMMENDSIGNAL_DEBUG=1` to reveal unexpected technical error details.
 
 ### Docker
 
@@ -158,7 +166,7 @@ docker build -t recommendsignal .
 docker run --rm -p 8587:8587 recommendsignal
 ```
 
-Then open `http://127.0.0.1:8587`. The container runs as a non-root user and includes a health check.
+Then open `http://127.0.0.1:8587`. The container runs as a non-root user and includes a health check. The image sets `STREAMLIT_SERVER_MAX_UPLOAD_SIZE=10000` (MB); pass `-e STREAMLIT_SERVER_MAX_UPLOAD_SIZE=<MB>` for another cap and `-e SIGNAL_PUBLIC=1` for the public-demo caps.
 
 ## Privacy
 

@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 
 from .errors import DataProblem
+from .limits import active, demo_limit
 
 
 EVENT_REQUIRED = ("user_id", "item_id", "timestamp")
@@ -88,6 +89,13 @@ class DataAudit:
     warnings: list[str]
 
 
+def _strip_text(series: pd.Series) -> pd.Series:
+    """``series.astype(str).str.strip()``, stripping each distinct value once (logs repeat IDs a lot)."""
+    codes, uniques = pd.factorize(series.astype(str), sort=False)
+    stripped = np.asarray(pd.Index(uniques).str.strip(), dtype=object)
+    return pd.Series(stripped[codes], index=series.index)
+
+
 def _missing_columns(frame: pd.DataFrame, required: tuple[str, ...]) -> list[str]:
     return [column for column in required if column not in frame.columns]
 
@@ -109,7 +117,7 @@ def validate_inputs(events: pd.DataFrame, items: pd.DataFrame) -> ValidatedData:
     for column in ("user_id", "item_id"):
         if events[column].isna().any():
             raise DataProblem(f"{column} cannot contain missing values.")
-        events[column] = events[column].astype(str).str.strip()
+        events[column] = _strip_text(events[column])
         if events[column].eq("").any():
             raise DataProblem(f"{column} cannot contain blank values.")
     for column in ("item_id", "item_name"):
@@ -145,13 +153,13 @@ def validate_inputs(events: pd.DataFrame, items: pd.DataFrame) -> ValidatedData:
     if "subgroup" not in events:
         events["subgroup"] = "All users"
         warnings.append("No subgroup column was supplied; subgroup reporting uses one all-user group.")
-    events["subgroup"] = events["subgroup"].fillna("Unspecified").astype(str).str.strip().replace("", "Unspecified")
+    events["subgroup"] = _strip_text(events["subgroup"].fillna("Unspecified")).replace("", "Unspecified")
     subgroup_stability = events.groupby("user_id", observed=True)["subgroup"].nunique()
     if (subgroup_stability > 1).any():
         unstable = subgroup_stability[subgroup_stability > 1].index[0]
         raise DataProblem(f"Each user must have one stable subgroup label; {unstable} has several.")
 
-    event_items = set(events["item_id"])
+    event_items = set(events["item_id"].unique())
     catalog_items = set(items["item_id"])
     missing_catalog = sorted(event_items - catalog_items)
     if missing_catalog:
@@ -185,10 +193,9 @@ def validate_inputs(events: pd.DataFrame, items: pd.DataFrame) -> ValidatedData:
         raise DataProblem("Content feature columns must contain finite numeric values without missing cells.")
     if np.allclose(matrix, 0):
         raise DataProblem("At least one content feature value must be nonzero.")
-    if len(items) > 2500:
-        raise DataProblem(
-            "This transparent baseline workbench supports at most 2,500 catalog items; use a production-scale evaluator for larger catalogs."
-        )
+    catalog_cap = active().catalog_items
+    if catalog_cap is not None and len(items) > catalog_cap:
+        raise DataProblem(demo_limit(f"The demo evaluates catalogs of at most {catalog_cap:,} items."))
 
     if events["user_id"].nunique() < 5:
         raise DataProblem("At least five users are required for policy comparison.")

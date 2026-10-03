@@ -11,7 +11,12 @@ from scipy import stats
 
 from .design import EvaluationConfig, ValidatedData, make_temporal_folds
 from .errors import DataProblem
+from .limits import active, demo_limit
 from .models import POLICIES, evaluate_fold
+
+
+# User bootstrap replicates are drawn in one matrix up to this many cells, in blocks above it.
+BOOTSTRAP_BLOCK_CELLS = 20_000_000
 
 
 @dataclass
@@ -37,7 +42,17 @@ def _bootstrap_user_mean_ci(frame: pd.DataFrame, column: str, repetitions: int, 
     if len(values) == 1:
         return estimate, np.nan, np.nan
     rng = np.random.default_rng(seed)
-    draws = rng.choice(values, size=(repetitions, len(values)), replace=True).mean(axis=1)
+    if repetitions * len(values) <= BOOTSTRAP_BLOCK_CELLS:
+        draws = rng.choice(values, size=(repetitions, len(values)), replace=True).mean(axis=1)
+    else:
+        # Many users: draw the replicates in blocks so memory stays bounded (same estimator, its own seeded draws).
+        block = max(1, BOOTSTRAP_BLOCK_CELLS // len(values))
+        draws = np.concatenate(
+            [
+                rng.choice(values, size=(min(block, repetitions - done), len(values)), replace=True).mean(axis=1)
+                for done in range(0, repetitions, block)
+            ]
+        )
     lower, upper = np.quantile(draws, [0.025, 0.975])
     return estimate, float(lower), float(upper)
 
@@ -75,8 +90,13 @@ def _summarize(
     config: EvaluationConfig,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     fold_rows: list[dict[str, object]] = []
+    # Row positions of each fold and policy's slates, found once; only the two columns used are gathered per group.
+    slate_positions = recommendations.groupby(["fold", "policy"], observed=True, sort=False).indices
+    slate_items = recommendations["item_id"].to_numpy()
+    slate_novelty = recommendations["novelty_bits"].to_numpy()
     for (fold, policy), group in user_metrics.groupby(["fold", "policy"], observed=True):
-        recs = recommendations.loc[(recommendations["fold"] == fold) & (recommendations["policy"] == policy)]
+        positions = slate_positions.get((fold, policy), np.zeros(0, dtype=int))
+        recs = pd.DataFrame({"item_id": slate_items[positions], "novelty_bits": slate_novelty[positions]})
         catalog_size = int(diagnostics.loc[diagnostics["fold"] == fold, "eligible_catalog_items"].iloc[0])
         exposure = _exposure_metrics(recs, catalog_size)
         cold_users = group.loc[group["cold_user"]]
@@ -133,11 +153,15 @@ def _summarize(
 def _contrasts(user_metrics: pd.DataFrame, config: EvaluationConfig) -> pd.DataFrame:
     rows: list[dict[str, object]] = []
     reference = config.reference_policy
+    pivots = {
+        metric: user_metrics.pivot_table(index=["user_id", "fold"], columns="policy", values=metric, aggfunc="mean")
+        for metric in ("recall_at_k", "ndcg_at_k")
+    }
     for policy in POLICIES:
         if policy == reference:
             continue
         for metric in ("recall_at_k", "ndcg_at_k"):
-            pivot = user_metrics.pivot_table(index=["user_id", "fold"], columns="policy", values=metric, aggfunc="mean")
+            pivot = pivots[metric]
             paired = pivot[[reference, policy]].dropna()
             by_user = (paired[policy] - paired[reference]).groupby("user_id").mean().dropna()
             if len(by_user) < 2:
@@ -217,6 +241,9 @@ def evaluate_policies(data: ValidatedData, config: EvaluationConfig | None = Non
     """Evaluate all declared policies without claiming an online treatment effect."""
 
     config = config or EvaluationConfig()
+    cap = active().bootstrap_repetitions
+    if cap is not None and config.bootstrap_repetitions > cap:
+        raise DataProblem(demo_limit(f"The demo runs at most {cap:,} bootstrap repetitions."))
     folds = make_temporal_folds(data.events, config)
     outputs = [evaluate_fold(data, fold, config) for fold in folds]
     user_frames = [output.user_metrics for output in outputs if not output.user_metrics.empty]
@@ -228,6 +255,8 @@ def evaluate_policies(data: ValidatedData, config: EvaluationConfig | None = Non
     user_metrics = pd.concat(user_frames, ignore_index=True)
     recommendations = pd.concat(rec_frames, ignore_index=True)
     diagnostics = pd.DataFrame([output.diagnostics for output in outputs])
+    # Drop the per-fold copies now that the combined tables hold every row.
+    del user_frames, rec_frames, outputs
     summaries, fold_metrics = _summarize(user_metrics, recommendations, diagnostics, config)
     contrasts = _contrasts(user_metrics, config)
     subgroup_metrics, subgroup_gaps = _subgroups(user_metrics)

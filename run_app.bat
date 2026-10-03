@@ -23,5 +23,5 @@ if not exist .venv\.recommendsignal-requirements-%REQ_HASH% (
 )
 
 if not defined RECOMMENDSIGNAL_PORT set RECOMMENDSIGNAL_PORT=8587
-if not defined RECOMMENDSIGNAL_MAX_UPLOAD_MB set RECOMMENDSIGNAL_MAX_UPLOAD_MB=200
+if not defined RECOMMENDSIGNAL_MAX_UPLOAD_MB set RECOMMENDSIGNAL_MAX_UPLOAD_MB=10000
 python -m streamlit run app.py --server.headless=false --server.address=127.0.0.1 --server.port=%RECOMMENDSIGNAL_PORT% --server.maxUploadSize=%RECOMMENDSIGNAL_MAX_UPLOAD_MB% --server.fileWatcherType=none --browser.gatherUsageStats=false

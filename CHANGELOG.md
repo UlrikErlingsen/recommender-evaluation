@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.2.0 — 2026-10-03
+
+### Larger datasets
+
+- Larger datasets: run locally (standalone, a local Signal Hub or an internal deployment), Recommend Signal no longer sets any limit on file size, rows, columns, users or catalog items; memory is the limit. The former 50 MB upload, 200 MB expanded-workbook, 500,000-row, 200-column and 2,500-item limits, plus a 1,000-repetition bootstrap cap, now apply only in the public demo (`SIGNAL_PUBLIC=1`), where messages say they are demo limits. All caps live in the new `recommendsignal.limits` module.
+- Streamlit's upload cap is 10,000 MB: `.streamlit/config.toml`, `RECOMMENDSIGNAL_MAX_UPLOAD_MB` (default 10000, was 200) in both launchers, and `STREAMLIT_SERVER_MAX_UPLOAD_SIZE=10000` in the Docker image.
+- Running out of memory while loading or evaluating is reported as a plain "not enough memory on this computer" message.
+- Users are scored in batches with matrix operations in parallel threads: slates use a linear-time top-K selection, popularity ranks need no per-user sort, and content and collaborative scores use the same per-user products as before, so every slate, metric and interval is identical to 1.1.0 on the same data. The demo evaluates about ten times faster. Large catalogs normalize the item similarity in place; user bootstrap replicates are drawn in blocks when there are very many users.
+- The app reads each pair of uploads once and keeps validation and evaluation in the session instead of re-reading, re-hashing and copying the data on every rerun.
+- Exports keep the full data: new user-metrics and recommendation-slates CSVs hold every row, a workbook sheet too large for Excel points to its CSV, and large evidence files are built when their button is clicked.
+- Measured on a 24-thread desktop: 5 million interactions (400,000 users, 2,000 items) are evaluated over three folds in about 3 minutes, with a peak of about 4.2 GB.
+
+### Suite
+
+- Suite: Rival, Reach, Learn and Blueprint Signal added to the suite table.
+
 ## 1.1.0 — 2026-10-02
 
 Signal brand refresh and Signal Hub entry point. The evaluation protocol, policies, metrics, data contract and exports are unchanged.
